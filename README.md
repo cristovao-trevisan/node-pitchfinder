@@ -81,6 +81,7 @@ the first peak that is higher than 93% of the highest peak detected. 93% is the 
 
 
 ## Todo
+- MacLeod using FFT
 - Integrate with `teoria` or another music theory tool to add more intelligent parsing.
 - Note-onsite algorithms.
 
