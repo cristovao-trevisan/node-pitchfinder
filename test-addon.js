@@ -3,25 +3,25 @@ const Pitchfinder = require('./index')
 let sine = []
 let fs = 47000
 let f = 440
-let bufferSize = 2048
+let bufferSize = 1024
 
 for (let i = 0; i < bufferSize; i++) {
   sine.push(100 * Math.sin(2 * Math.PI * f / fs * i))
 }
 
-let yinJs = new Pitchfinder.YIN({ sampleRate: fs })
+let yinJs = Pitchfinder.YIN({ sampleRate: fs })
 console.time('JS')
 let pitch
 for (let i = 0; i < 1000; i++) {
-  pitch = yinJs(sine)
+  pitch = yinJs.getResult(sine)
 }
 console.timeEnd('JS')
-console.log(pitch, 440 - pitch)
+console.log(pitch, 'err: ' + (440 - pitch.pitch))
 
-let macLeod = new Pitchfinder.MACLEOD({ bufferSize, sampleRate: fs })
+let macLeod = Pitchfinder.MacLeod({ bufferSize: 2048, sampleRate: fs })
 console.time('Addon')
 for (let i = 0; i < 1000; i++) {
-  pitch = macLeod(Float64Array.from(sine))
+  pitch = macLeod.getResult(Float64Array.from(sine))
 }
 console.timeEnd('Addon')
-console.log(pitch, 440 - pitch)
+console.log(pitch, 'err: ' + (440 - pitch.pitch))

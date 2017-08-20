@@ -12,27 +12,19 @@ void Yin::Init(v8::Local<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   // Prototype
   Nan::SetPrototypeMethod(tpl, "getPitch", getPitch);
+  Nan::SetPrototypeMethod(tpl, "getResult", getResult);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("Yin").ToLocalChecked(), tpl->GetFunction());
 }
 
 void Yin::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.IsConstructCall()) {
-    // Invoked as constructor: `new MyObject(...)`
-    double sampleRate = info[0]->IsUndefined() ? DEFAULT_YIN_SAMPLE_RATE : info[0]->NumberValue();
-    double threshold = info[1]->IsUndefined() ? DEFAULT_YIN_THRESHOLD : info[1]->NumberValue();
-    double probabilityThreshold = info[2]->IsUndefined() ? DEFAULT_YIN_PROBABILITY_THRESHOLD : info[2]->NumberValue();
-    Yin* obj = new Yin(sampleRate, threshold, probabilityThreshold);
-    obj->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
-  } else {
-    // Invoked as plain function `MyObject(...)`, turn into construct call.
-    const int argc = 1;
-    v8::Local<v8::Value> argv[argc] = { info[0] };
-    v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-    info.GetReturnValue().Set(cons->NewInstance(argc, argv));
-  }
+  double sampleRate = info[0]->IsUndefined() ? DEFAULT_YIN_SAMPLE_RATE : info[0]->NumberValue();
+  double threshold = info[1]->IsUndefined() ? DEFAULT_YIN_THRESHOLD : info[1]->NumberValue();
+  double probabilityThreshold = info[2]->IsUndefined() ? DEFAULT_YIN_PROBABILITY_THRESHOLD : info[2]->NumberValue();
+  Yin* obj = new Yin(sampleRate, threshold, probabilityThreshold);
+  obj->Wrap(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 void Yin::init(double sampleRate, double threshold, double probabilityThreshold) {
@@ -54,7 +46,22 @@ void Yin::getPitch(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   assert(info[0]->IsFloat64Array());
   v8::Local<v8::Float64Array> input = info[0].As<v8::Float64Array>();
   Nan::TypedArrayContents<double> inputData(input);
-  info.GetReturnValue().Set(Nan::New(obj->calculatePitch((*inputData), input->Length())));
+  double pitch = obj->calculatePitch((*inputData), input->Length());
+  if (obj->probability < obj->probabilityThreshold) pitch = -1;
+  info.GetReturnValue().Set(Nan::New(pitch));
+}
+
+void Yin::getResult(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  Yin* obj = ObjectWrap::Unwrap<Yin>(info.Holder());
+  assert(info[0]->IsFloat64Array());
+  v8::Local<v8::Float64Array> input = info[0].As<v8::Float64Array>();
+  Nan::TypedArrayContents<double> inputData(input);
+  double pitch = obj->calculatePitch((*inputData), input->Length());
+  v8::Local<v8::Object> result = Nan::New<v8::Object>();
+  result->Set(Nan::New("pitch").ToLocalChecked(), Nan::New(pitch));
+  result->Set(Nan::New("probability").ToLocalChecked(), Nan::New(obj->probability));
+
+  info.GetReturnValue().Set(result);
 }
 
 double Yin::calculatePitch (double* data, size_t dataSize) {
@@ -65,7 +72,7 @@ double Yin::calculatePitch (double* data, size_t dataSize) {
   // Set up the buffer as described in step one of the YIN paper.
   double buffer[bufferSize];
 
-  double probability = 0;
+  probability = 0;
   long tau;
   unsigned int i, t;
   // Compute the difference function as described in step 2 of the YIN paper.
@@ -112,11 +119,6 @@ double Yin::calculatePitch (double* data, size_t dataSize) {
 
   // if no pitch found, return -1
   if (tau == bufferSize || buffer[tau] >= threshold) {
-    return -1;
-  }
-
-  // If probability too low, return -1.
-  if (probability < probabilityThreshold) {
     return -1;
   }
 

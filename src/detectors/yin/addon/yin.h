@@ -20,6 +20,7 @@ private:
   ~Yin();
   double threshold;
   double sampleRate;
+  double probability;
   double probabilityThreshold;
 
   double calculatePitch (double* data, size_t dataSize);
@@ -27,6 +28,7 @@ private:
   static Nan::Persistent<v8::Function> constructor;
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void getPitch(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void getResult(const Nan::FunctionCallbackInfo<v8::Value>& info);
 };
 
 #endif

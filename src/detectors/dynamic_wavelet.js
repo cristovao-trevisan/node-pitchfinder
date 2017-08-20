@@ -7,8 +7,10 @@ const MAXIMA_THRESHOLD_RATIO = 0.75
 module.exports = function (config = {}) {
   const sampleRate = config.sampleRate || DEFAULT_SAMPLE_RATE
 
-  return function DynamicWaveletDetector (float32AudioBuffer) {
+  return function DynamicWaveletDetector (data) {
     'use strict'
+    let float32AudioBuffer = data
+    if (!(data instanceof Float64Array)) float32AudioBuffer = Float64Array.from(data)
 
     const mins = []
     const maxs = []

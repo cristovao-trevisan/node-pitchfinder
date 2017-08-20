@@ -75,10 +75,24 @@ const moreAccurateFrequencies = Pitchfinder.frequencies(detectors, float64Array,
 - `cutoff` - Defines the relative size the chosen peak (pitch) has. 0.93 means: choose
 the first peak that is higher than 93% of the highest peak detected. 93% is the default value used in the Tartini user interface.
 - `freqCutoff` - Minimum frequency to be detected (default 80Hz)
+- `probabilityThreshold` - don't return a pitch if probability estimate is below this number.
 
 ### Dynamic Wavelet
 *no special config*
 
+## MORE API
+
+### YIN and MacLeod
+- method: getResult (data) - does not use probabilityThreshold, returns an object with probability instead, like `{ pitch: number, probability: number }`
+
+#### Usage
+```js
+const {MacLeod} = require('node-pitchfinder')
+const detectPitch = MacLeod().getResult
+
+detectPitch(data)
+// {pitch: 440, probability: 1}
+```
 
 ## Todo
 - MacLeod using FFT
