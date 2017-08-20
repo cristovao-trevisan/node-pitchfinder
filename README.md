@@ -35,26 +35,6 @@ const float64Array = decoded.channelData[0] // get a single channel of sound
 const pitch = detectPitch(float64Array) // All detectors are using float64Array internally, but you can also give an ordinary array of numbers
 ```
 
-### Finding a series of pitches
-Set a tempo and a quantization interval, and an array of pitches at each interval will be returned.
-
-```javascript
-const Pitchfinder = require('node-pitchfinder')
-const detectPitch = Pitchfinder.MacLeod()
-
-const frequencies = Pitchfinder.frequencies(detectPitch, float64Array, {
-  tempo: 130, // in BPM, defaults to 120
-  quantization: 4, // samples per beat, defaults to 4 (i.e. 16th notes)
-})
-
-// or use multiple detectors for better accuracy at the cost of speed.
-const detectors = [detectPitch, Pitchfinder.AMDF()]
-const moreAccurateFrequencies = Pitchfinder.frequencies(detectors, float64Array, {
-  tempo: 130, // in BPM, defaults to 120
-  quantization: 4, // samples per beat, defaults to 4 (i.e. 16th notes)
-})
-```
-
 ## Configuration
 
 ### All detectors
@@ -96,8 +76,6 @@ detectPitch(data)
 
 ## Todo
 - MacLeod using FFT
-- Integrate with `teoria` or another music theory tool to add more intelligent parsing.
-- Note-onsite algorithms.
 
 ## Thanks
 Several of these algorithms were ported from Jonas Six's excellent TarsosDSP library (written in Java).  If you're looking for a far deeper set of tools than this, check out his work [on his website](http://tarsos.0110.be/tag/TarsosDSP) or [on Github](https://github.com/JorenSix/TarsosDSP).
