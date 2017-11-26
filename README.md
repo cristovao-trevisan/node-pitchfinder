@@ -24,10 +24,10 @@ Based on [pitchfinder](https://github.com/peterkhayes/pitchfinder), but running 
 ```javascript
 const fs = require('fs')
 const WavDecoder = require('wav-decoder')
-const Pitchfinder = require('node-pitchfinder')
+const { YIN } = require('node-pitchfinder')
 
-// see below for optional constructor parameters.
-const detectPitch = new Pitchfinder.YIN()
+// see below for option parameters.
+const detectPitch = YIN({ sampleRate: 44100 })
 
 const buffer = fs.readFileSync(PATH_TO_FILE)
 const decoded = WavDecoder.decode(buffer) // get audio data from file using `wav-decoder`
