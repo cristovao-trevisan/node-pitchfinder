@@ -1,4 +1,4 @@
-const {Yin} = require('../../../build/Release/addon')
+const { Yin } = require('../../../build/Release/addon')
 
 module.exports = (options = {}) => {
   const detector = new Yin(options.sampleRate, options.threshold, options.probabilityThreshold)
