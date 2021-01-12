@@ -21,6 +21,7 @@ console.log(pitch, 'err: ' + (440 - pitch.pitch))
 let macLeod = Pitchfinder.MacLeod({ bufferSize: 2048, sampleRate: fs })
 console.time('Addon')
 for (let i = 0; i < 1000; i++) {
+  console.log(`${i} out of 1000 for MacLeod`)
   pitch = macLeod.getResult(Float64Array.from(sine))
 }
 console.timeEnd('Addon')

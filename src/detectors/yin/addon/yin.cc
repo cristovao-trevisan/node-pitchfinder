@@ -7,21 +7,30 @@ void Yin::Init(v8::Local<v8::Object> exports) {
   Nan::HandleScope scope;
 
   // Prepare constructor template
+  v8::Local<v8::Context> context = exports->CreationContext();
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+  
   tpl->SetClassName(Nan::New("Yin").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   // Prototype
   Nan::SetPrototypeMethod(tpl, "getPitch", getPitch);
   Nan::SetPrototypeMethod(tpl, "getResult", getResult);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("Yin").ToLocalChecked(), tpl->GetFunction());
+  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+  
+  exports->Set(
+    context,
+    Nan::New("Yin").ToLocalChecked(),
+    tpl->GetFunction(context).ToLocalChecked()
+  );
 }
 
 void Yin::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-  double sampleRate = info[0]->IsUndefined() ? DEFAULT_YIN_SAMPLE_RATE : info[0]->NumberValue();
-  double threshold = info[1]->IsUndefined() ? DEFAULT_YIN_THRESHOLD : info[1]->NumberValue();
-  double probabilityThreshold = info[2]->IsUndefined() ? DEFAULT_YIN_PROBABILITY_THRESHOLD : info[2]->NumberValue();
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+
+  double sampleRate = info[0]->IsUndefined() ? DEFAULT_YIN_SAMPLE_RATE : info[0]->NumberValue(context).FromJust();
+  double threshold = info[1]->IsUndefined() ? DEFAULT_YIN_THRESHOLD : info[1]->NumberValue(context).FromJust();
+  double probabilityThreshold = info[2]->IsUndefined() ? DEFAULT_YIN_PROBABILITY_THRESHOLD : info[2]->NumberValue(context).FromJust();
   Yin* obj = new Yin(sampleRate, threshold, probabilityThreshold);
   obj->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
@@ -52,14 +61,16 @@ void Yin::getPitch(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void Yin::getResult(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+  
   Yin* obj = ObjectWrap::Unwrap<Yin>(info.Holder());
   assert(info[0]->IsFloat64Array());
   v8::Local<v8::Float64Array> input = info[0].As<v8::Float64Array>();
   Nan::TypedArrayContents<double> inputData(input);
   double pitch = obj->calculatePitch((*inputData), input->Length());
   v8::Local<v8::Object> result = Nan::New<v8::Object>();
-  result->Set(Nan::New("pitch").ToLocalChecked(), Nan::New(pitch));
-  result->Set(Nan::New("probability").ToLocalChecked(), Nan::New(obj->probability));
+  result->Set(context, Nan::New("pitch").ToLocalChecked(), Nan::New(pitch));
+  result->Set(context, Nan::New("probability").ToLocalChecked(), Nan::New(obj->probability));
 
   info.GetReturnValue().Set(result);
 }
