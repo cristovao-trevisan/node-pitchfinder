@@ -1,5 +1,4 @@
 <p align="center">
-  <a href="https://travis-ci.org/cristovao-trevisan/node-pitchfinder"><img src="https://travis-ci.org/peterkhayes/pitchfinder.svg?branch=master"></a>
   <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
 </p>
 
@@ -17,6 +16,8 @@ Based on [pitchfinder](https://github.com/peterkhayes/pitchfinder), but running 
 
 ## Installation
 `npm install --save node-pitchfinder`
+
+> For node < 10 use version ^1.x, version 2+ is for node >= 10
 
 ## Usage
 

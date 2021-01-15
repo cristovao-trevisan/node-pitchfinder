@@ -1,4 +1,4 @@
-const {MacLeod} = require('../../../build/Release/addon')
+const { MacLeod } = require('../../../build/Release/addon')
 
 module.exports = (options = {}) => {
   const detector = new MacLeod(options.bufferSize, options.sampleRate, options.cutoff, options.freqCutoff, options.probabilityThreshold)

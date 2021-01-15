@@ -13,6 +13,7 @@ void MacLeod::Init(v8::Local<v8::Object> exports) {
   Nan::HandleScope scope;
 
   // Prepare constructor template
+  v8::Local<v8::Context> context = exports->CreationContext();
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
   tpl->SetClassName(Nan::New("MacLeod").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -20,16 +21,18 @@ void MacLeod::Init(v8::Local<v8::Object> exports) {
   Nan::SetPrototypeMethod(tpl, "getPitch", getPitch);
   Nan::SetPrototypeMethod(tpl, "getResult", getResult);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("MacLeod").ToLocalChecked(), tpl->GetFunction());
+  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+  exports->Set(context, Nan::New("MacLeod").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
 }
 
 void MacLeod::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-  unsigned int bufferSize = info[0]->IsUndefined() ? DEFAULT_MACLEOD_BUFFER_SIZE : info[0]->NumberValue();
-  double sampleRate = info[1]->IsUndefined() ? DEFAULT_MACLEOD_SAMPLE_RATE : info[1]->NumberValue();
-  double cutoff = info[2]->IsUndefined() ? DEFAULT_MACLEOD_CUTOFF : info[2]->NumberValue();
-  double freqCutoff = info[3]->IsUndefined() ? DEFAULT_MACLEOD_LOWER_PITCH_CUTOFF : info[3]->NumberValue();
-  double probabilityThreshold = info[4]->IsUndefined() ? DEFAULT_MACLEOD_PROBABILITY_THRESHOLD : info[4]->NumberValue();
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+
+  unsigned int bufferSize = info[0]->IsUndefined() ? DEFAULT_MACLEOD_BUFFER_SIZE : info[0]->NumberValue(context).FromJust();
+  double sampleRate = info[1]->IsUndefined() ? DEFAULT_MACLEOD_SAMPLE_RATE : info[1]->NumberValue(context).FromJust();
+  double cutoff = info[2]->IsUndefined() ? DEFAULT_MACLEOD_CUTOFF : info[2]->NumberValue(context).FromJust();
+  double freqCutoff = info[3]->IsUndefined() ? DEFAULT_MACLEOD_LOWER_PITCH_CUTOFF : info[3]->NumberValue(context).FromJust();
+  double probabilityThreshold = info[4]->IsUndefined() ? DEFAULT_MACLEOD_PROBABILITY_THRESHOLD : info[4]->NumberValue(context).FromJust();
   MacLeod* obj = new MacLeod(bufferSize, sampleRate, cutoff, freqCutoff, probabilityThreshold);
   obj->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
@@ -66,6 +69,8 @@ void MacLeod::getPitch(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void MacLeod::getResult(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+
   MacLeod* obj = ObjectWrap::Unwrap<MacLeod>(info.Holder());
   assert(info[0]->IsFloat64Array());
   v8::Local<v8::Float64Array> input = info[0].As<v8::Float64Array>();
@@ -73,8 +78,8 @@ void MacLeod::getResult(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::TypedArrayContents<double> inputData(input);
   double pitch = obj->calculatePitch((*inputData), input->Length());
   v8::Local<v8::Object> result = Nan::New<v8::Object>();
-  result->Set(Nan::New("pitch").ToLocalChecked(), Nan::New(pitch));
-  result->Set(Nan::New("probability").ToLocalChecked(), Nan::New(obj->probability));
+  result->Set(context, Nan::New("pitch").ToLocalChecked(), Nan::New(pitch));
+  result->Set(context, Nan::New("probability").ToLocalChecked(), Nan::New(obj->probability));
 
   info.GetReturnValue().Set(result);
 }
