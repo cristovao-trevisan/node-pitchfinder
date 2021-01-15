@@ -17,6 +17,8 @@ Based on [pitchfinder](https://github.com/peterkhayes/pitchfinder), but running 
 ## Installation
 `npm install --save node-pitchfinder`
 
+> For node < 10 use version ^1.x, version 2+ is for node >= 10
+
 ## Usage
 
 ### Finding the pitch of a wav file in node
