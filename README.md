@@ -1,5 +1,6 @@
 <p align="center">
   <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
+  <a href="https://www.npmjs.com/package/node-pitchfinder"><img src="https://img.shields.io/npm/v/node-pitchfinder" alt="NPM version badge"></a>
 </p>
 
 # node-pitchfinder
